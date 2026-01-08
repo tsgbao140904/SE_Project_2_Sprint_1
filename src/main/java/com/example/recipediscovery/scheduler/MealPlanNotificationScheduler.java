@@ -2,6 +2,7 @@ package com.example.recipediscovery.scheduler;
 
 import com.example.recipediscovery.model.MealPlan;
 import com.example.recipediscovery.model.MealPlanItem;
+import com.example.recipediscovery.model.Recipe;
 import com.example.recipediscovery.model.User;
 import com.example.recipediscovery.repository.MealPlanItemRepository;
 import com.example.recipediscovery.repository.MealPlanRepository;
@@ -11,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -41,6 +43,7 @@ public class MealPlanNotificationScheduler {
     /**
      * Gửi thông báo bữa sáng lúc 07:00 mỗi ngày
      */
+    @Transactional(readOnly = true)
     @Scheduled(cron = "0 0 7 * * ?")
     public void sendBreakfastNotifications() {
         logger.info("🍳 Starting BREAKFAST notifications at: {}", LocalDateTime.now());
@@ -50,6 +53,7 @@ public class MealPlanNotificationScheduler {
     /**
      * Gửi thông báo bữa trưa lúc 11:00 mỗi ngày
      */
+    @Transactional(readOnly = true)
     @Scheduled(cron = "0 0 11 * * ?")
     public void sendLunchNotifications() {
         logger.info("🍽️ Starting LUNCH notifications at: {}", LocalDateTime.now());
@@ -59,6 +63,7 @@ public class MealPlanNotificationScheduler {
     /**
      * Gửi thông báo bữa phụ lúc 15:00 mỗi ngày
      */
+    @Transactional(readOnly = true)
     @Scheduled(cron = "0 0 15 * * ?")
     public void sendSnackNotifications() {
         logger.info("☕ Starting SNACK notifications at: {}", LocalDateTime.now());
@@ -68,6 +73,7 @@ public class MealPlanNotificationScheduler {
     /**
      * Gửi thông báo bữa tối lúc 17:00 mỗi ngày
      */
+    @Transactional(readOnly = true)
     @Scheduled(cron = "0 0 17 * * ?")
     public void sendDinnerNotifications() {
         logger.info("🌙 Starting DINNER notifications at: {}", LocalDateTime.now());
@@ -122,9 +128,25 @@ public class MealPlanNotificationScheduler {
 
                     if (itemOpt.isPresent()) {
                         MealPlanItem item = itemOpt.get();
-                        emailService.sendMealPlanNotification(user, item, mealType);
-                        sentCount++;
-                        logger.debug("Sent {} notification to user: {}", mealType, user.getEmail());
+                        
+                        // CRITICAL FIX: Force initialize recipe to avoid LazyInitializationException
+                        Recipe recipe = item.getRecipe();
+                        if (recipe != null) {
+                            // Trigger lazy loading while we're still in transaction
+                            recipe.getTitle();
+                            recipe.getIngredients();
+                            recipe.getInstructions();
+                            recipe.getCalories();
+                            recipe.getCookingTime();
+                            recipe.getServings();
+                            
+                            // Now send email with fully loaded recipe
+                            emailService.sendMealPlanNotification(user, item, mealType);
+                            sentCount++;
+                            logger.debug("Sent {} notification to user: {}", mealType, user.getEmail());
+                        } else {
+                            logger.warn("Recipe is null for MealPlanItem {}", item.getId());
+                        }
                     }
 
                 } catch (Exception e) {
