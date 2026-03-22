@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"><title>Chi tiết báo cáo – RecipeAdmin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root{--nav-h:64px;--nav-bg:#0f172a;--ac:#818cf8;--acd:#6366f1;--bg:#f4f5fb;--card:#fff;--bd:#e8eaf2;--sh:0 1px 3px rgba(0,0,0,.05),0 6px 20px rgba(0,0,0,.06);--t1:#0f172a;--t2:#5b6278;--t3:#9ca3af;--r:14px;--tr:.2s ease;--green:#10b981;--amber:#f59e0b;--red:#ef4444;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t1);font-size:14px;min-height:100vh;}
+    .topnav{position:sticky;top:0;z-index:200;height:var(--nav-h);background:var(--nav-bg);display:flex;align-items:center;padding:0 28px;box-shadow:0 4px 20px rgba(0,0,0,.25);}
+    .nav-brand{display:flex;align-items:center;gap:10px;margin-right:36px;text-decoration:none;flex-shrink:0;}
+    .nav-logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--acd),var(--ac));display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;}
+    .nb-text{font-size:15px;font-weight:800;color:#fff;} .nb-sub{font-size:10.5px;color:#64748b;}
+    .nav-links{display:flex;align-items:center;gap:2px;}
+    .nl{display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:9px;color:#94a3b8;font-size:13.5px;font-weight:500;text-decoration:none;transition:var(--tr);position:relative;}
+    .nl:hover{background:rgba(255,255,255,.08);color:#e2e8f0;}
+    .nl.active{background:rgba(129,140,248,.15);color:var(--ac);}
+    .nl.active::after{content:'';position:absolute;bottom:-1px;left:14px;right:14px;height:2px;background:var(--ac);border-radius:2px 2px 0 0;}
+    .nav-right{display:flex;align-items:center;gap:10px;margin-left:auto;}
+    .nav-sep{width:1px;height:20px;background:rgba(255,255,255,.1);}
+    .n-admin{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:20px;background:rgba(255,255,255,.07);}
+    .n-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--acd),var(--ac));display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;}
+    .n-name{font-size:12.5px;font-weight:600;color:#e2e8f0;}
+    .n-logout{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;background:rgba(239,68,68,.1);color:#f87171;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:var(--tr);}
+    .n-logout:hover{background:rgba(239,68,68,.2);}
+    .page-wrap{padding:28px 32px;}
+    .page-head{display:flex;align-items:start;justify-content:space-between;margin-bottom:24px;}
+    .pt{font-size:20px;font-weight:800;letter-spacing:-.3px;} .ps{font-size:13px;color:var(--t3);margin-top:4px;display:flex;align-items:center;gap:8px;}
+    /* card */
+    .pc{background:var(--card);border-radius:var(--r);border:1px solid var(--bd);box-shadow:var(--sh);padding:24px;margin-bottom:20px;}
+    .pc-title{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:16px;}
+    /* info table */
+    .ir{display:flex;gap:0;margin-bottom:12px;}
+    .ik{font-size:12.5px;font-weight:600;color:var(--t3);width:150px;flex-shrink:0;padding-top:1px;}
+    .iv{font-size:13.5px;color:var(--t1);flex:1;}
+    /* pills */
+    .pill{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;}
+    .p-amber{background:#fffbeb;color:#b45309;} .p-green{background:#ecfdf5;color:#059669;} .p-red{background:#fef2f2;color:#dc2626;} .p-blue{background:#eff6ff;color:#2563eb;} .p-slate{background:#f8fafc;color:#64748b;}
+    .dot{width:6px;height:6px;border-radius:50%;display:inline-block;}
+    .d-a{background:#f59e0b;} .d-g{background:#10b981;} .d-r{background:#ef4444;}
+    /* form */
+    .fl{font-size:12.5px;font-weight:600;color:#374151;margin-bottom:6px;display:block;}
+    .fi{width:100%;border:1.5px solid var(--bd);border-radius:10px;padding:10px 14px;font-size:13.5px;font-family:inherit;color:var(--t1);background:var(--card);transition:var(--tr);outline:none;}
+    .fi:focus{border-color:var(--acd);box-shadow:0 0 0 3px rgba(99,102,241,.12);}
+    /* radio opts */
+    .radio-g{display:flex;gap:10px;margin-top:6px;}
+    .ro{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;border:1.5px solid var(--bd);cursor:pointer;transition:var(--tr);flex:1;}
+    .ro:has(input:checked){border-color:var(--acd);background:#f0f4ff;}
+    .ro input{accent-color:var(--acd);width:15px;height:15px;flex-shrink:0;}
+    .ro-lbl{font-size:13px;font-weight:600;}
+    .ro-sub{font-size:11px;color:var(--t3);margin-top:2px;}
+    /* del check */
+    .del-opt{display:flex;align-items:center;gap:9px;padding:11px 14px;border-radius:10px;border:1px solid #fecaca;background:#fef2f2;cursor:pointer;}
+    .del-opt input{accent-color:var(--red);width:15px;height:15px;}
+    .del-opt span{font-size:13px;font-weight:500;color:#dc2626;}
+    /* content box */
+    .cb{background:#fafbff;border:1px solid #eef0ff;border-radius:12px;padding:16px;}
+    .r-thumb{width:66px;height:52px;border-radius:10px;object-fit:cover;}
+    .av-sm{width:34px;height:34px;border-radius:50%;object-fit:cover;}
+    /* buttons */
+    .bs{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:10px;background:linear-gradient(135deg,var(--acd),var(--ac));color:#fff;font-weight:700;font-size:13.5px;border:none;cursor:pointer;transition:var(--tr);}
+    .bs:hover{filter:brightness(1.08);}
+    .btn-b{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;background:#f1f5f9;color:#64748b;border:1px solid var(--bd);transition:var(--tr);}
+    .btn-b:hover{background:#e2e8f0;color:var(--t1);}
+    .btn-c{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:10px;background:#f1f5f9;color:#64748b;font-size:13.5px;font-weight:600;text-decoration:none;border:1px solid var(--bd);transition:var(--tr);}
+    .btn-c:hover{background:#e2e8f0;color:var(--t1);}
+    /* alerts */
+    .the-al{padding:12px 16px;border-radius:10px;font-size:13px;display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+    .al-ok{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;}
+    .al-err{background:#fef2f2;border:1px solid #fecaca;color:#991b1b;}
+    .al-info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;}
+  </style>
+</head>
+<body>
+<nav class="topnav">
+  <a href="/admin/dashboard" class="nav-brand">
+    <div class="nav-logo"><i class="fa-solid fa-bowl-food"></i></div>
+    <div><div class="nb-text">RecipeAdmin</div><div class="nb-sub">Bảng quản trị</div></div>
+  </a>
+  <div class="nav-links">
+    <a href="/admin/dashboard" class="nl"><i class="fa-solid fa-house"></i>Tổng quan</a>
+    <a href="/admin/users" class="nl"><i class="fa-solid fa-users"></i>Người dùng</a>
+    <a href="/admin/community" class="nl"><i class="fa-solid fa-globe"></i>Duyệt công thức</a>
+    <a href="/admin/reports" class="nl active"><i class="fa-solid fa-flag"></i>Báo cáo vi phạm</a>
+  </div>
+  <div class="nav-right">
+    <div class="nav-sep"></div>
+    <div class="n-admin">
+      <div class="n-av"><i class="fa-solid fa-user-tie" style="font-size:11px;"></i></div>
+      <span class="n-name">Quản trị viên</span>
+    </div>
+    <form th:action="@{/logout}" method="post">
+      <button type="submit" class="n-logout"><i class="fa-solid fa-arrow-right-from-bracket"></i>Đăng xuất</button>
+    </form>
+  </div>
+</nav>
+
+<div class="page-wrap">
+  <div class="page-head">
+    <div>
+      <div class="pt">Báo cáo số #<span th:text="${report.id}"></span></div>
+      <div class="ps">
+        Trạng thái:
+        <span th:switch="${report.status}">
+          <span th:case="'PENDING'"  class="pill p-amber" style="vertical-align:middle;"><span class="dot d-a"></span>Chờ xử lý</span>
+          <span th:case="'RESOLVED'" class="pill p-green" style="vertical-align:middle;"><span class="dot d-g"></span>Đã xử lý</span>
+          <span th:case="'REJECTED'" class="pill p-red"   style="vertical-align:middle;"><span class="dot d-r"></span>Từ chối</span>
+        </span>
+      </div>
+    </div>
+    <a href="/admin/reports" class="btn-b"><i class="fa-solid fa-arrow-left"></i>Quay lại</a>
+  </div>
+
+  <div th:if="${saved}" class="the-al al-ok"><i class="fa-solid fa-circle-check"></i><span th:text="${saved}"></span></div>
+  <div th:if="${error}" class="the-al al-err"><i class="fa-solid fa-circle-exclamation"></i><span th:text="${error}"></span></div>
+
+  <div class="row g-4">
+    <!-- LEFT: info + process -->
+    <div class="col-lg-6">
+      <div class="pc">
+        <div class="pc-title">Thông tin báo cáo</div>
+        <div class="ir">
+          <div class="ik">Người báo cáo</div>
+          <div class="iv">
+            <div style="font-weight:600;" th:text="${report.reporter!=null?report.reporter.fullName:'#'+report.reporterId}"></div>
+            <div style="font-size:12px;color:var(--t3);" th:if="${report.reporter!=null}" th:text="${report.reporter.email}"></div>
+          </div>
+        </div>
+        <div class="ir">
+          <div class="ik">Loại nội dung</div>
+          <div class="iv">
+            <span class="pill p-blue" th:if="${report.targetType=='RECIPE'}"><i class="fa-solid fa-utensils" style="font-size:10px;"></i>Công thức #<span th:text="${report.targetId}"></span></span>
+            <span class="pill p-slate" th:if="${report.targetType=='REVIEW'}"><i class="fa-regular fa-comment" style="font-size:10px;"></i>Bình luận #<span th:text="${report.targetId}"></span></span>
+          </div>
+        </div>
+        <div class="ir">
+          <div class="ik">Lý do</div>
+          <div class="iv" style="font-weight:600;" th:text="${report.reason}"></div>
+        </div>
+        <div class="ir" th:if="${report.description!=null and !#strings.isEmpty(report.description)}">
+          <div class="ik">Mô tả thêm</div>
+          <div class="iv" style="color:var(--t2);" th:text="${report.description}"></div>
+        </div>
+        <div class="ir">
+          <div class="ik">Thời gian gửi</div>
+          <div class="iv" style="color:var(--t2);" th:text="${#temporals.format(report.createdAt.toLocalDateTime(),'dd/MM/yyyy HH:mm')}"></div>
+        </div>
+        <div class="ir" th:if="${report.processedAt!=null}">
+          <div class="ik">Thời gian xử lý</div>
+          <div class="iv" style="color:var(--t2);" th:text="${#temporals.format(report.processedAt.toLocalDateTime(),'dd/MM/yyyy HH:mm')}"></div>
+        </div>
+        <div class="ir" th:if="${report.processor!=null}">
+          <div class="ik">Người xử lý</div>
+          <div class="iv" th:text="${report.processor.fullName}"></div>
+        </div>
+        <div class="ir" th:if="${report.adminNote!=null and !#strings.isEmpty(report.adminNote)}">
+          <div class="ik">Ghi chú</div>
+          <div class="iv" style="color:var(--t2);" th:text="${report.adminNote}"></div>
+        </div>
+      </div>
+
+      <!-- Process form -->
+      <div class="pc" th:if="${report.isPending()}">
+        <div class="pc-title">Xử lý báo cáo</div>
+        <form th:action="@{'/admin/reports/'+${report.id}+'/process'}" method="post">
+          <div style="margin-bottom:16px;">
+            <label class="fl">Quyết định xử lý</label>
+            <div class="radio-g">
+              <label class="ro">
+                <input type="radio" name="action" value="RESOLVED" checked>
+                <div>
+                  <div class="ro-lbl" style="color:var(--green);"><i class="fa-solid fa-circle-check me-1"></i>Duyệt báo cáo</div>
+                  <div class="ro-sub">Xác nhận nội dung vi phạm</div>
+                </div>
+              </label>
+              <label class="ro">
+                <input type="radio" name="action" value="REJECTED">
+                <div>
+                  <div class="ro-lbl" style="color:var(--red);"><i class="fa-solid fa-circle-xmark me-1"></i>Từ chối</div>
+                  <div class="ro-sub">Nội dung không vi phạm</div>
+                </div>
+              </label>
+            </div>
+          </div>
+          <div style="margin-bottom:16px;">
+            <label class="del-opt">
+              <input type="checkbox" name="deleteContent" value="true">
+              <span><i class="fa-solid fa-trash me-1"></i>Xóa nội dung vi phạm khi duyệt báo cáo</span>
+            </label>
+          </div>
+          <div style="margin-bottom:16px;">
+            <label class="fl">Ghi chú <span style="font-weight:400;color:var(--t3);">(Tuỳ chọn)</span></label>
+            <textarea name="adminNote" class="fi" style="resize:vertical;" rows="3" placeholder="Ghi chú lý do xử lý..."></textarea>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="submit" class="bs"><i class="fa-solid fa-check"></i>Xác nhận</button>
+            <a href="/admin/reports" class="btn-c">Hủy</a>
+          </div>
+        </form>
+      </div>
+
+      <div class="the-al al-info" th:unless="${report.isPending()}">
+        <i class="fa-solid fa-circle-info"></i>
+        Báo cáo này đã được xử lý và không thể thay đổi.
+        <span th:if="${report.adminNote!=null and !#strings.isEmpty(report.adminNote)}" th:text="' Ghi chú: '+${report.adminNote}"></span>
+      </div>
+    </div>
+
+    <!-- RIGHT: reported content -->
+    <div class="col-lg-6">
+      <div class="pc">
+        <div class="pc-title">Nội dung bị báo cáo</div>
+
+        <!-- Recipe -->
+        <div th:if="${targetRecipe!=null}" class="cb">
+          <div class="d-flex gap-3 align-items-start">
+            <img th:src="${targetRecipe.imageUrl}?:'https://via.placeholder.com/66'" class="r-thumb" alt="">
+            <div>
+              <div style="font-weight:700;font-size:15px;margin-bottom:4px;" th:text="${targetRecipe.title}"></div>
+              <div style="font-size:12.5px;color:var(--t3);">Người tạo: #<span th:text="${targetRecipe.userId}"></span></div>
+              <a th:href="@{'/admin/community/'+${targetRecipe.id}}"
+                 style="display:inline-flex;align-items:center;gap:5px;margin-top:10px;font-size:13px;font-weight:600;color:var(--acd);text-decoration:none;">
+                Xem công thức <i class="fa-solid fa-arrow-right" style="font-size:11px;"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Review -->
+        <div th:if="${targetReview!=null}" class="cb">
+          <div class="d-flex gap-2 align-items-start">
+            <img th:src="${targetReview.user!=null?targetReview.user.avatarUrl:'https://ui-avatars.com/api/?name=U&background=6366f1&color=fff'}"
+                 class="av-sm" alt="">
+            <div>
+              <div style="font-weight:600;font-size:13.5px;" th:text="${targetReview.user!=null?targetReview.user.fullName:'#'+targetReview.userId}"></div>
+              <div style="font-size:13px;color:var(--t2);margin-top:6px;line-height:1.6;" th:text="${targetReview.comment}"></div>
+              <div style="font-size:11.5px;color:var(--t3);margin-top:6px;" th:text="${#temporals.format(targetReview.createdAt.toLocalDateTime(),'dd/MM/yyyy HH:mm')}"></div>
+            </div>
+          </div>
+        </div>
+
+        <div th:if="${targetRecipe==null and targetReview==null}"
+             style="text-align:center;padding:32px;color:var(--t3);">
+          <i class="fa-solid fa-triangle-exclamation" style="font-size:26px;opacity:.2;display:block;margin-bottom:8px;"></i>
+          Nội dung đã bị xóa hoặc không tìm thấy
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body></html>
