@@ -1,288 +1,464 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Admin Dashboard</title>
+  <meta charset="UTF-8"><title>Bảng điều khiển – RecipeAdmin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <style>
+    /* ── TOKENS ──────────────────────────────────────────────── */
+    :root {
+      --nav-h:       64px;
+      --nav-bg:      #0f172a;
+      --nav-border:  rgba(255,255,255,.07);
+      --accent:      #818cf8;
+      --accent-dark: #6366f1;
+      --bg:          #f4f5fb;
+      --card:        #ffffff;
+      --border:      #e8eaf2;
+      --shadow:      0 1px 3px rgba(0,0,0,.05), 0 6px 20px rgba(0,0,0,.06);
+      --text-1:      #0f172a;
+      --text-2:      #5b6278;
+      --text-3:      #9ca3af;
+      --radius:      14px;
+      --green:       #10b981;
+      --amber:       #f59e0b;
+      --red:         #ef4444;
+      --blue:        #3b82f6;
+      --purple:      #a855f7;
+      --teal:        #14b8a6;
+      --rose:        #f43f5e;
+      --tr:          .2s ease;
+    }
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    html { scroll-behavior:smooth; }
+    body { font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var(--text-1); font-size:14px; min-height:100vh; }
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-          rel="stylesheet">
+    /* ── TOPNAV ──────────────────────────────────────────────── */
+    .topnav {
+      position:sticky; top:0; z-index:200;
+      height:var(--nav-h); background:var(--nav-bg);
+      display:flex; align-items:center; padding:0 28px; gap:0;
+      box-shadow:0 1px 0 var(--nav-border), 0 4px 20px rgba(0,0,0,.25);
+    }
+    .nav-brand {
+      display:flex; align-items:center; gap:10px;
+      margin-right:36px; text-decoration:none; flex-shrink:0;
+    }
+    .nav-logo {
+      width:34px; height:34px; border-radius:9px;
+      background:linear-gradient(135deg,var(--accent-dark),var(--accent));
+      display:flex; align-items:center; justify-content:center;
+      color:#fff; font-size:16px;
+    }
+    .nav-brand-text { font-size:15px; font-weight:800; color:#fff; letter-spacing:-.3px; }
+    .nav-brand-sub  { font-size:10.5px; color:#64748b; font-weight:400; }
 
-    <style>
-        body {
-    background: #f3f4f6;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
+    .nav-links { display:flex; align-items:center; gap:2px; flex:1; }
+    .nav-link-item {
+      display:flex; align-items:center; gap:7px;
+      padding:8px 14px; border-radius:9px;
+      color:#94a3b8; font-size:13.5px; font-weight:500;
+      text-decoration:none; transition:var(--tr); position:relative;
+    }
+    .nav-link-item i { font-size:13px; }
+    .nav-link-item:hover { background:rgba(255,255,255,.08); color:#e2e8f0; }
+    .nav-link-item.active {
+      background:rgba(129,140,248,.15); color:var(--accent);
+    }
+    .nav-link-item.active::after {
+      content:''; position:absolute; bottom:-1px; left:14px; right:14px;
+      height:2px; background:var(--accent); border-radius:2px 2px 0 0;
+    }
+    .nav-badge {
+      background:#ef4444; color:#fff; border-radius:20px;
+      padding:1px 7px; font-size:10.5px; font-weight:700;
+    }
 
-/* ===================== SIDEBAR ===================== */
-.sidebar {
-    background: linear-gradient(180deg, #111827 0%, #1f2937 100%);
-    min-height: 100vh;
-    color: #fff;
-    padding: 20px 18px;
-    box-shadow: 4px 0 18px rgba(0,0,0,0.45);
-}
+    .nav-right { display:flex; align-items:center; gap:10px; margin-left:auto; }
+    .nav-clock { font-size:12px; color:#64748b; font-weight:500; }
+    .nav-sep { width:1px; height:20px; background:rgba(255,255,255,.1); }
+    .nav-admin {
+      display:flex; align-items:center; gap:8px;
+      padding:6px 12px; border-radius:20px;
+      background:rgba(255,255,255,.07); cursor:default;
+    }
+    .nav-admin-av {
+      width:26px; height:26px; border-radius:50%;
+      background:linear-gradient(135deg,var(--accent-dark),var(--accent));
+      display:flex; align-items:center; justify-content:center;
+      font-size:12px; color:#fff;
+    }
+    .nav-admin-name { font-size:12.5px; font-weight:600; color:#e2e8f0; }
+    .nav-logout {
+      display:flex; align-items:center; gap:6px;
+      padding:7px 14px; border-radius:8px;
+      background:rgba(239,68,68,.1); color:#f87171;
+      font-size:13px; font-weight:600; border:none; cursor:pointer; transition:var(--tr);
+    }
+    .nav-logout:hover { background:rgba(239,68,68,.2); }
 
-.sidebar h4 {
-    font-weight: 700;
-    font-size: 20px;
-    margin-bottom: 18px;
-    padding-left: 2px;
-}
+    /* ── PAGE SHELL ──────────────────────────────────────────── */
+    .page-wrap { padding:28px 32px; }
+    .page-head {
+      display:flex; align-items:center; justify-content:space-between;
+      margin-bottom:24px;
+    }
+    .page-title { font-size:22px; font-weight:800; letter-spacing:-.4px; }
+    .page-sub { font-size:13px; color:var(--text-3); margin-top:3px; }
 
-.sidebar .nav-link {
-    border-radius: 12px;
-    padding: 10px 14px;
-    color: #e5e7eb !important;
-    font-size: 15px;
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    transition: .2s;
-}
+    /* ── METRIC CARDS ────────────────────────────────────────── */
+    .metric-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+    .mc {
+      background:var(--card); border-radius:var(--radius);
+      border:1px solid var(--border); box-shadow:var(--shadow);
+      padding:20px; position:relative; overflow:hidden; transition:var(--tr);
+    }
+    .mc:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(0,0,0,.1); }
+    .mc-icon {
+      width:40px; height:40px; border-radius:11px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:17px; margin-bottom:12px;
+    }
+    .mc-val { font-size:30px; font-weight:800; line-height:1; color:var(--text-1); }
+    .mc-lbl { font-size:12.5px; color:var(--text-3); margin-top:5px; font-weight:500; }
+    .mc-bar { position:absolute; bottom:0; left:0; right:0; height:3px; }
+    /* colors */
+    .mc-indigo .mc-icon { background:#eef0ff; color:#6366f1; } .mc-indigo .mc-bar { background:#6366f1; }
+    .mc-purple .mc-icon { background:#faf5ff; color:#a855f7; } .mc-purple .mc-bar { background:#a855f7; }
+    .mc-teal   .mc-icon { background:#f0fdfa; color:#14b8a6; } .mc-teal .mc-bar   { background:#14b8a6; }
+    .mc-blue   .mc-icon { background:#eff6ff; color:#3b82f6; } .mc-blue .mc-bar   { background:#3b82f6; }
+    .mc-amber  .mc-icon { background:#fffbeb; color:#f59e0b; } .mc-amber .mc-bar  { background:#f59e0b; }
+    .mc-green  .mc-icon { background:#ecfdf5; color:#10b981; } .mc-green .mc-bar  { background:#10b981; }
+    .mc-red    .mc-icon { background:#fef2f2; color:#ef4444; } .mc-red .mc-bar    { background:#ef4444; }
+    .mc-slate  .mc-icon { background:#f8fafc; color:#64748b; } .mc-slate .mc-bar  { background:#94a3b8; }
 
-.sidebar .nav-link:hover:not(.active) {
-    background: rgba(255,255,255,0.12);
-}
+    /* ── SECTION CARD ────────────────────────────────────────── */
+    .sc {
+      background:var(--card); border-radius:var(--radius);
+      border:1px solid var(--border); box-shadow:var(--shadow); overflow:hidden;
+    }
+    .sc-head {
+      padding:16px 22px; border-bottom:1px solid var(--border);
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .sc-title { font-size:14px; font-weight:700; }
+    .sc-sub   { font-size:12px; color:var(--text-3); margin-top:2px; }
+    .sc-body  { padding:20px 22px; }
 
-.sidebar .nav-link.active {
-    background: #22c55e;
-    color: #0b1120 !important;
-    font-weight: 600;
-}
+    /* ── TABLE ───────────────────────────────────────────────── */
+    .dt { width:100%; border-collapse:collapse; }
+    .dt thead th {
+      font-size:11px; font-weight:700; color:var(--text-3);
+      text-transform:uppercase; letter-spacing:.7px;
+      padding:10px 16px; border-bottom:1px solid var(--border); background:#fafbfc;
+    }
+    .dt tbody td {
+      padding:12px 16px; border-bottom:1px solid #f3f4f8;
+      font-size:13.5px; vertical-align:middle;
+    }
+    .dt tbody tr:last-child td { border-bottom:none; }
+    .dt tbody tr:hover td     { background:#f7f8ff; }
 
-.sidebar .icon {
-    width: 26px;
-    height: 26px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255,255,255,0.1);
-    border-radius: 8px;
-    font-size: 14px;
-}
+    /* ── RANK ────────────────────────────────────────────────── */
+    .rank { width:24px; height:24px; border-radius:7px; display:inline-flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; }
+    .r1 { background:#fef3c7; color:#92400e; }
+    .r2 { background:#f1f5f9; color:#475569; }
+    .r3 { background:#fef2f2; color:#9a3412; }
+    .rn { background:#f8f9fc; color:#94a3b8; }
 
-/* Logout button */
-.sidebar form {
-    border-top: 1px solid rgba(255,255,255,0.2);
-    padding-top: 20px;
-    margin-top: 30px;
-}
+    /* ── STATUS PILL ─────────────────────────────────────────── */
+    .pill { display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:600; padding:3px 10px; border-radius:20px; }
+    .p-purple { background:#faf5ff; color:#7c3aed; }
+    .p-slate  { background:#f8fafc; color:#64748b; }
+    .dot { width:6px; height:6px; border-radius:50%; }
+    .d-green  { background:#10b981; } .d-amber { background:#f59e0b; } .d-red { background:#ef4444; }
 
-/* ===================== MAIN HEADER ===================== */
-.main-header {
-    border-bottom: 1px solid rgba(0,0,0,0.1);
-    padding-bottom: 14px;
-    margin-bottom: 25px;
-}
+    /* images */
+    .av { border-radius:50%; object-fit:cover; }
+    .av-sm { width:32px; height:32px; }
+    .img-recipe { width:46px; height:36px; border-radius:8px; object-fit:cover; }
 
-/* ===================== DASHBOARD CARDS ===================== */
-.stat-card {
-    border-radius: 16px;
-    border: none;
-    padding: 22px;
-    color: #fff;
-    box-shadow: 0 8px 18px rgba(0,0,0,0.12);
-}
-
-.bg-blue { background: #3b82f6; }
-.bg-green { background: #22c55e; }
-.bg-yellow { background: #eab308; }
-.bg-red { background: #ef4444; }
-
-.stat-value {
-    font-size: 28px;
-    font-weight: 700;
-}
-.stat-label {
-    font-size: 14px;
-    opacity: .9;
-}
-
-/* ===================== TABLES ===================== */
-.table-hover tbody tr:hover {
-    background: #f0f2f5 !important;
-}
-
-.table th {
-    font-weight: 600;
-    color: #374151;
-}
-
-/* ===================== BUTTONS ===================== */
-.btn-success {
-    background: #22c55e !important;
-    border-color: #22c55e !important;
-}
-.btn-success:hover {
-    background: #16a34a !important;
-}
-
-.btn-primary {
-    background: #3b82f6 !important;
-    border-color: #3b82f6 !important;
-}
-.btn-primary:hover {
-    background: #2563eb !important;
-}
-
-.btn-danger {
-    background: #ef4444 !important;
-    border-color: #ef4444 !important;
-}
-.btn-danger:hover {
-    background: #dc2626 !important;
-}
-
-.btn-warning {
-    background: #eab308 !important;
-    border-color: #eab308 !important;
-    color: #000;
-}
-.btn-warning:hover {
-    background: #ca8a04 !important;
-}
-
-/* ===================== FORM PAGES ===================== */
-.form-card {
-    background: #ffffff;
-    border-radius: 16px;
-    padding: 28px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.07);
-}
-
-.form-title {
-    font-size: 22px;
-    font-weight: 700;
-    color: #15803d;
-}
-
-label {
-    font-weight: 600;
-    margin-bottom: 6px;
-}
-
-/* ===================== COMMUNITY APPROVAL BADGES ===================== */
-.badge.bg-warning {
-    background: #facc15 !important;
-    color: #000 !important;
-}
-.badge.bg-success {
-    background: #22c55e !important;
-}
-.badge.bg-danger {
-    background: #ef4444 !important;
-}
-
-/* Clickable table rows if needed */
-.table-row-link {
-    cursor: pointer;
-    transition: .2s;
-}
-.table-row-link:hover {
-    background: #eef2ff !important;
-}
-
-    </style>
+    .chart-wrap { position:relative; height:220px; }
+  </style>
 </head>
-
 <body>
 
-<div class="container-fluid">
-    <div class="row">
-
-        <!-- SIDEBAR -->
-        <div class="col-md-3 col-lg-2 sidebar">
-
-            <h4 class="mb-3">Admin Panel</h4>
-            <ul class="nav flex-column mb-auto">
-
-                <li class="nav-item mb-1">
-                    <a href="/admin/dashboard"
-                       class="nav-link"
-                       th:classappend="${activePage=='dashboard'} ? ' active'">
-                        <span class="icon">📊</span> Dashboard
-                    </a>
-                </li>
-
-                <li class="nav-item mb-1">
-                    <a href="/admin/users"
-                       class="nav-link"
-                       th:classappend="${activePage=='users'} ? ' active'">
-                        <span class="icon">👥</span> Quản lý người dùng
-                    </a>
-                </li>
-
-                <li class="nav-item mb-1">
-                    <a href="/admin/community"
-                       class="nav-link"
-                       th:classappend="${activePage=='community'} ? ' active'">
-                        <span class="icon">🌎</span> Duyệt công thức
-                    </a>
-                </li>
-
-            </ul>
-
-            <form class="mt-4 pt-3 border-top border-secondary-subtle"
-                  th:action="@{/logout}" method="post">
-                <button class="btn btn-outline-light w-100">Đăng xuất</button>
-            </form>
-
-        </div>
-
-
-
-        <!-- MAIN -->
-        <main class="col-md-9 col-lg-10 p-4">
-
-            <!-- HEADER -->
-            <div class="main-header d-flex justify-content-between align-items-center">
-                <div>
-                    <h2 class="fw-bold">Trang quản trị</h2>
-                    <p class="text-muted small">Tổng quan nhanh hệ thống.</p>
-                </div>
-
-                <span class="badge bg-success px-3 py-2">
-                    ⚙️ Admin
-                </span>
-            </div>
-
-            <!-- DASHBOARD STATS -->
-            <div class="row g-3">
-
-                <div class="col-md-3">
-                    <div class="stat-card bg-blue shadow">
-                        <div class="stat-value" th:text="${totalUsers}">0</div>
-                        <div class="stat-label">Người dùng</div>
-                    </div>
-                </div>
-
-                <div class="col-md-3">
-                    <div class="stat-card bg-yellow shadow">
-                        <div class="stat-value" th:text="${pending}">0</div>
-                        <div class="stat-label">Công thức chờ duyệt</div>
-                    </div>
-                </div>
-
-                <div class="col-md-3">
-                    <div class="stat-card bg-green shadow">
-                        <div class="stat-value" th:text="${approved}">0</div>
-                        <div class="stat-label">Đã duyệt</div>
-                    </div>
-                </div>
-
-                <div class="col-md-3">
-                    <div class="stat-card bg-red shadow">
-                        <div class="stat-value" th:text="${rejected}">0</div>
-                        <div class="stat-label">Bị từ chối</div>
-                    </div>
-                </div>
-
-            </div>
-
-        </main>
+<!-- ═══════════════════ TOPNAV ══════════════════════════════════ -->
+<nav class="topnav">
+  <a href="/admin/dashboard" class="nav-brand">
+    <div class="nav-logo"><i class="fa-solid fa-bowl-food"></i></div>
+    <div>
+      <div class="nav-brand-text">RecipeAdmin</div>
+      <div class="nav-brand-sub">Bảng quản trị</div>
     </div>
+  </a>
+
+  <div class="nav-links">
+    <a href="/admin/dashboard" class="nav-link-item active">
+      <i class="fa-solid fa-house"></i>Tổng quan
+    </a>
+    <a href="/admin/users" class="nav-link-item">
+      <i class="fa-solid fa-users"></i>Người dùng
+    </a>
+    <a href="/admin/community" class="nav-link-item">
+      <i class="fa-solid fa-globe"></i>Duyệt công thức
+    </a>
+    <a href="/admin/reports" class="nav-link-item">
+      <i class="fa-solid fa-flag"></i>Báo cáo vi phạm
+      <span th:if="${pendingReports > 0}" class="nav-badge" th:text="${pendingReports}"></span>
+    </a>
+  </div>
+
+  <div class="nav-right">
+    <span class="nav-clock" id="clock"></span>
+    <div class="nav-sep"></div>
+    <div class="nav-admin">
+      <div class="nav-admin-av"><i class="fa-solid fa-user-tie" style="font-size:11px;"></i></div>
+      <span class="nav-admin-name">Quản trị viên</span>
+    </div>
+    <form th:action="@{/logout}" method="post">
+      <button type="submit" class="nav-logout">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i>Đăng xuất
+      </button>
+    </form>
+  </div>
+</nav>
+
+<!-- ═══════════════════ CONTENT ═════════════════════════════════ -->
+<div class="page-wrap">
+
+  <div class="page-head">
+    <div>
+      <div class="page-title">Bảng điều khiển</div>
+      <div class="page-sub">Theo dõi hoạt động và số liệu quan trọng của nền tảng</div>
+    </div>
+  </div>
+
+  <!-- Metric row 1 -->
+  <div class="metric-grid mb-3">
+    <div class="mc mc-indigo">
+      <div class="mc-icon"><i class="fa-solid fa-users"></i></div>
+      <div class="mc-val" th:text="${totalUsers}">0</div>
+      <div class="mc-lbl">Người dùng</div>
+      <div class="mc-bar"></div>
+    </div>
+    <div class="mc mc-purple">
+      <div class="mc-icon"><i class="fa-solid fa-utensils"></i></div>
+      <div class="mc-val" th:text="${totalRecipes}">0</div>
+      <div class="mc-lbl">Tổng công thức</div>
+      <div class="mc-bar"></div>
+    </div>
+    <div class="mc mc-teal">
+      <div class="mc-icon"><i class="fa-solid fa-calendar-days"></i></div>
+      <div class="mc-val" th:text="${totalMealPlans}">0</div>
+      <div class="mc-lbl">Kế hoạch bữa ăn</div>
+      <div class="mc-bar"></div>
+    </div>
+    <div class="mc mc-blue">
+      <div class="mc-icon"><i class="fa-solid fa-star"></i></div>
+      <div class="mc-val" th:text="${totalReviews}">0</div>
+      <div class="mc-lbl">Đánh giá</div>
+      <div class="mc-bar"></div>
+    </div>
+  </div>
+
+  <!-- Metric row 2 -->
+  <div class="metric-grid mb-4">
+    <div class="mc mc-amber">
+      <div class="mc-icon"><i class="fa-solid fa-clock"></i></div>
+      <div class="mc-val" th:text="${pending}">0</div>
+      <div class="mc-lbl">Công thức chờ duyệt</div>
+      <div class="mc-bar"></div>
+    </div>
+    <div class="mc mc-green">
+      <div class="mc-icon"><i class="fa-solid fa-circle-check"></i></div>
+      <div class="mc-val" th:text="${approved}">0</div>
+      <div class="mc-lbl">Đã duyệt</div>
+      <div class="mc-bar"></div>
+    </div>
+    <div class="mc mc-red">
+      <div class="mc-icon"><i class="fa-solid fa-circle-xmark"></i></div>
+      <div class="mc-val" th:text="${rejected}">0</div>
+      <div class="mc-lbl">Từ chối</div>
+      <div class="mc-bar"></div>
+    </div>
+    <div class="mc mc-slate">
+      <div class="mc-icon"><i class="fa-solid fa-flag"></i></div>
+      <div class="mc-val" th:text="${pendingReports}">0</div>
+      <div class="mc-lbl">Báo cáo chờ xử lý</div>
+      <div class="mc-bar"></div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="row g-4 mb-4">
+    <div class="col-lg-8">
+      <div class="sc h-100">
+        <div class="sc-head">
+          <div>
+            <div class="sc-title">Tăng trưởng theo tháng</div>
+            <div class="sc-sub">Người dùng mới và công thức mới trong 6 tháng gần nhất</div>
+          </div>
+        </div>
+        <div class="sc-body"><div class="chart-wrap"><canvas id="growthChart"></canvas></div></div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="sc h-100">
+        <div class="sc-head">
+          <div>
+            <div class="sc-title">Tỉ lệ duyệt</div>
+            <div class="sc-sub">Phân bổ trạng thái công thức</div>
+          </div>
+        </div>
+        <div class="sc-body d-flex flex-column align-items-center">
+          <div class="chart-wrap w-100"><canvas id="donutChart"></canvas></div>
+          <div class="d-flex gap-4 mt-3">
+            <div class="text-center">
+              <div style="font-weight:700;font-size:16px;" th:text="${approved}"></div>
+              <div style="font-size:11px;color:var(--text-3);margin-top:3px;display:flex;align-items:center;gap:4px;">
+                <span class="dot d-green"></span>Đã duyệt
+              </div>
+            </div>
+            <div class="text-center">
+              <div style="font-weight:700;font-size:16px;" th:text="${pending}"></div>
+              <div style="font-size:11px;color:var(--text-3);margin-top:3px;display:flex;align-items:center;gap:4px;">
+                <span class="dot d-amber"></span>Chờ duyệt
+              </div>
+            </div>
+            <div class="text-center">
+              <div style="font-weight:700;font-size:16px;" th:text="${rejected}"></div>
+              <div style="font-size:11px;color:var(--text-3);margin-top:3px;display:flex;align-items:center;gap:4px;">
+                <span class="dot d-red"></span>Từ chối
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom tables -->
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="sc">
+        <div class="sc-head">
+          <div>
+            <div class="sc-title">Công thức yêu thích nhất</div>
+            <div class="sc-sub">Dựa trên lượt yêu thích và điểm đánh giá</div>
+          </div>
+        </div>
+        <table class="dt">
+          <thead>
+            <tr>
+              <th>Hạng</th><th>Công thức</th>
+              <th class="text-center">Yêu thích</th>
+              <th class="text-center">Đánh giá</th>
+              <th class="text-center">Sao TB</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="r, i : ${topRecipes}">
+              <td>
+                <span class="rank" th:classappend="${i.index==0} ? 'r1' : (${i.index==1} ? 'r2' : (${i.index==2} ? 'r3' : 'rn'))"
+                      th:text="${i.index+1}"></span>
+              </td>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <img th:src="${r.image_url}" class="img-recipe" alt="">
+                  <span style="font-weight:500;font-size:13px;" th:text="${r.title}"></span>
+                </div>
+              </td>
+              <td class="text-center" style="font-weight:700;color:#ef4444;" th:text="${r.fav_count}"></td>
+              <td class="text-center" style="color:var(--text-3);" th:text="${r.review_count}"></td>
+              <td class="text-center" style="font-weight:600;">
+                <i class="fa-solid fa-star" style="color:#f59e0b;font-size:11px;"></i>
+                <span th:text="${#numbers.formatDecimal(r.avg_rating,1,1)}"></span>
+              </td>
+            </tr>
+            <tr th:if="${topRecipes == null or #lists.isEmpty(topRecipes)}">
+              <td colspan="5" style="text-align:center;padding:32px;color:var(--text-3);">Chưa có dữ liệu</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="sc">
+        <div class="sc-head">
+          <div>
+            <div class="sc-title">Người dùng mới đăng ký</div>
+            <div class="sc-sub">5 tài khoản gần nhất</div>
+          </div>
+        </div>
+        <table class="dt">
+          <thead>
+            <tr><th>Người dùng</th><th class="text-center">Vai trò</th><th>Ngày đăng ký</th></tr>
+          </thead>
+          <tbody>
+            <tr th:each="u : ${recentUsers}">
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <img th:src="${u.avatarUrl}" class="av av-sm" alt="">
+                  <div>
+                    <div style="font-weight:600;font-size:13px;" th:text="${u.fullName}"></div>
+                    <div style="font-size:11px;color:var(--text-3);" th:text="${u.email}"></div>
+                  </div>
+                </div>
+              </td>
+              <td class="text-center">
+                <span class="pill p-purple" th:if="${u.role == 'ADMIN'}">Quản trị</span>
+                <span class="pill p-slate"  th:if="${u.role == 'USER'}">Người dùng</span>
+              </td>
+              <td style="color:var(--text-3);font-size:12.5px;"
+                  th:text="${#temporals.format(u.createdAt.toLocalDateTime(),'dd/MM/yyyy')}"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+<script th:inline="javascript">
+  function tick(){ document.getElementById('clock').textContent = new Date().toLocaleString('vi-VN',{hour:'2-digit',minute:'2-digit',second:'2-digit',day:'2-digit',month:'2-digit',year:'numeric'}); }
+  tick(); setInterval(tick,1000);
+
+  const months     = /*[[${months}]]*/     [];
+  const newUsers   = /*[[${newUsers}]]*/   [];
+  const newRecipes = /*[[${newRecipes}]]*/ [];
+  const approved   = /*[[${approved}]]*/   0;
+  const pending    = /*[[${pending}]]*/    0;
+  const rejected   = /*[[${rejected}]]*/   0;
+
+  Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
+  Chart.defaults.color = '#9ca3af';
+
+  new Chart(document.getElementById('growthChart'),{
+    type:'line',
+    data:{
+      labels:months,
+      datasets:[
+        { label:'Người dùng mới', data:newUsers,   borderColor:'#6366f1', backgroundColor:'rgba(99,102,241,.08)',  fill:true, tension:.4, pointRadius:4, pointBackgroundColor:'#6366f1' },
+        { label:'Công thức mới',  data:newRecipes, borderColor:'#10b981', backgroundColor:'rgba(16,185,129,.08)', fill:true, tension:.4, pointRadius:4, pointBackgroundColor:'#10b981' }
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ position:'top', labels:{ boxWidth:10, usePointStyle:true, pointStyle:'circle', font:{size:12} } } },
+      scales:{ y:{ beginAtZero:true, ticks:{stepSize:1}, grid:{color:'#f1f5f9'} }, x:{ grid:{color:'#f1f5f9'} } }
+    }
+  });
+
+  new Chart(document.getElementById('donutChart'),{
+    type:'doughnut',
+    data:{ labels:['Đã duyệt','Chờ duyệt','Từ chối'], datasets:[{ data:[approved,pending,rejected], backgroundColor:['#10b981','#f59e0b','#ef4444'], borderWidth:0, hoverOffset:4 }] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'70%', plugins:{ legend:{display:false} } }
+  });
+</script>
+</body></html>

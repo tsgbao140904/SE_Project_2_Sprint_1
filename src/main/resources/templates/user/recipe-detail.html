@@ -1,18 +1,23 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
 <head>
   <meta charset="UTF-8">
-  <title>Chi tiết công thức</title>
+  <title th:text="${recipe.title} + ' – Chi tiết'">Chi tiết công thức</title>
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
   <style>
-    body { background: #f5f5f7; font-family: system-ui, sans-serif; }
+    body {
+      background: #f5f5f7;
+      font-family: system-ui, sans-serif;
+    }
 
     .detail-card {
       border-radius: 18px;
       background: white;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
       overflow: hidden;
     }
 
@@ -33,140 +38,681 @@
       font-weight: 600;
     }
 
-    /* ✅ quan trọng: giữ xuống dòng trong text */
+    /* giữ xuống dòng trong text */
     .preline {
-      white-space: pre-line; /* hiển thị \n, \r\n thành xuống dòng */
+      white-space: pre-line;
       line-height: 1.6;
       margin-bottom: 0;
+    }
+
+    /* ===== STAR RATING ===== */
+    .stars-display {
+      display: inline-flex;
+      gap: 2px;
+      font-size: 18px;
+    }
+
+    .stars-display .star-filled {
+      color: #f5a623;
+    }
+
+    .stars-display .star-empty {
+      color: #ddd;
+    }
+
+    /* Interactive star rating form */
+    .star-rating {
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: flex-end;
+      gap: 4px;
+    }
+
+    .star-rating input[type="radio"] {
+      display: none;
+    }
+
+    .star-rating label {
+      font-size: 30px;
+      color: #ddd;
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+
+    .star-rating input:checked~label,
+    .star-rating label:hover,
+    .star-rating label:hover~label {
+      color: #f5a623;
+    }
+
+    /* ===== REVIEW CARD ===== */
+    .review-card {
+      border: 1px solid #eee;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      background: #fafafa;
+    }
+
+    .review-card:hover {
+      background: #f0f8f0;
+    }
+
+    .reviewer-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    /* ===== REPLY CARD ===== */
+    .reply-section {
+      border-left: 3px solid #d4edda;
+      padding-left: 12px;
+    }
+
+    .reply-card {
+      background: #f8fffe;
+      border: 1px solid #e8f5e9;
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+
+    .reply-card:hover {
+      background: #edfbf0;
+    }
+
+
+    .avg-rating-badge {
+      background: linear-gradient(135deg, #f5a623, #f0741e);
+      color: white;
+      border-radius: 12px;
+      padding: 12px 20px;
+      display: inline-block;
+    }
+
+    /* ===== AUTHOR OVERLAY TRÊN ẢNH ===== */
+    .author-overlay {
+      position: absolute;
+      bottom: 14px;
+      left: 14px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 50px;
+      padding: 6px 14px 6px 6px;
+      color: white;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .author-overlay:hover {
+      background: rgba(0, 0, 0, 0.72);
+    }
+
+    .author-overlay img {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid #4caf50;
+      object-fit: cover;
+    }
+
+    .author-overlay .author-label {
+      font-size: 10px;
+      color: #a8f0b0;
+      line-height: 1;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .author-overlay .author-name {
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.2;
     }
   </style>
 </head>
 
 <body class="p-3">
 
-<!-- 🔙 NÚT QUAY LẠI -->
-<a href="#"
-   class="btn btn-secondary mb-3"
-   onclick="if (window.history.length > 1) { window.history.back(); } else { window.location.href='/app/home'; } return false;">
-  ← Quay lại
-</a>
+  <!-- 🔙 NÚT QUAY LẠI -->
+  <a href="#" class="btn btn-secondary mb-3"
+    onclick="if (window.history.length > 1) { window.history.back(); } else { window.location.href='/app/home'; } return false;">
+    ← Quay lại
+  </a>
 
+  <!-- FLASH MESSAGES -->
+  <div th:if="${reviewSuccess}" class="alert alert-success alert-dismissible container mb-3" role="alert">
+    <i class="fa fa-check-circle me-1"></i>
+    <span th:text="${reviewSuccess}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+  <div th:if="${reviewError}" class="alert alert-danger alert-dismissible container mb-3" role="alert">
+    <i class="fa fa-exclamation-circle me-1"></i>
+    <span th:text="${reviewError}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+  <div th:if="${reportSuccess}" class="alert alert-info alert-dismissible container mb-3" role="alert">
+    <i class="fa fa-flag me-1"></i>
+    <span th:text="${reportSuccess}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+  <div th:if="${reportError}" class="alert alert-warning alert-dismissible container mb-3" role="alert">
+    <i class="fa fa-exclamation-triangle me-1"></i>
+    <span th:text="${reportError}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
 
-<div class="container">
-  <div class="detail-card">
+  <div class="container">
+    <div class="detail-card">
 
-    <div class="position-relative">
-      <img th:src="${recipe.imageUrl} ?: 'https://via.placeholder.com/900x500'"
-           class="detail-img" alt="recipe">
+      <div class="position-relative">
+        <img th:src="${recipe.imageUrl} ?: 'https://via.placeholder.com/900x500'" class="detail-img" alt="recipe">
 
-      <span class="category-pill"
-            th:style="'background:' + ${(recipe.userCategory != null and recipe.userCategory.colorCode != null) ? recipe.userCategory.colorCode : '#4caf50'}">
-          <span th:text="${(recipe.userCategory != null and recipe.userCategory.icon != null) ? recipe.userCategory.icon : '🍽️'}"></span>
-          <span th:text="${(recipe.userCategory != null and recipe.userCategory.name != null) ? recipe.userCategory.name : 'Chưa phân loại'}"></span>
-      </span>
-    </div>
+        <span class="category-pill"
+          th:style="'background:' + ${(recipe.userCategory != null and recipe.userCategory.colorCode != null) ? recipe.userCategory.colorCode : '#4caf50'}">
+          <span
+            th:text="${(recipe.userCategory != null and recipe.userCategory.icon != null) ? recipe.userCategory.icon : '🍽️'}"></span>
+          <span
+            th:text="${(recipe.userCategory != null and recipe.userCategory.name != null) ? recipe.userCategory.name : 'Chưa phân loại'}"></span>
+        </span>
 
-    <div class="p-4">
-
-      <h2 class="fw-bold mb-2" th:text="${recipe.title}"></h2>
-
-      <div th:if="${recipe.shareStatus != null}" class="mt-2">
-        <div th:if="${recipe.shareStatus == 'PENDING'}" class="alert alert-warning">
-          ⏳ Công thức này đang chờ admin duyệt.
+        <!-- 👤 TÁC GIẢ OVERLAY (chỉ hiện ở Community) -->
+        <div th:if="${isCommunity == true and recipeAuthor != null}" class="author-overlay">
+          <img th:src="${recipeAuthor.avatarUrl}" th:alt="${recipeAuthor.fullName}">
+          <div>
+            <div class="author-label">Tác giả</div>
+            <div class="author-name" th:text="${recipeAuthor.fullName}"></div>
+          </div>
         </div>
 
-        <div th:if="${recipe.shareStatus == 'APPROVED'}" class="alert alert-success">
-          ✔ Công thức đã được admin duyệt!
+      </div>
+
+      <div class="p-4">
+
+        <h2 class="fw-bold mb-2" th:text="${recipe.title}"></h2>
+
+        <!-- Avg Rating nhanh (chỉ hiện ở Community) -->
+        <div th:if="${isCommunity == true and avgRating != null}" class="mb-3">
+          <span class="avg-rating-badge">
+            <i class="fa fa-star me-1"></i>
+            <strong th:text="${#numbers.formatDecimal(avgRating, 1, 1)}"></strong>
+            <span class="opacity-75 ms-1" th:text="'(' + ${totalReviews} + ' đánh giá)'"></span>
+          </span>
+        </div>
+        <div th:if="${isCommunity == true and avgRating == null}" class="mb-3 text-muted small">
+          <i class="fa fa-star me-1"></i> Chưa có đánh giá nào
         </div>
 
-        <div th:if="${recipe.shareStatus == 'REJECTED'}" class="alert alert-danger">
-          ❌ Công thức bị từ chối.
-          <br>
-          <small th:text="'Lý do: ' + ${recipe.shareRejectedReason}"></small>
+        <div th:if="${recipe.shareStatus != null}" class="mt-2">
+          <div th:if="${recipe.shareStatus == 'PENDING'}" class="alert alert-warning">
+            ⏳ Công thức này đang chờ admin duyệt.
+          </div>
+          <div th:if="${recipe.shareStatus == 'APPROVED'}" class="alert alert-success">
+            ✔ Công thức đã được admin duyệt!
+          </div>
+          <div th:if="${recipe.shareStatus == 'REJECTED'}" class="alert alert-danger">
+            ❌ Công thức bị từ chối.
+            <br>
+            <small th:text="'Lý do: ' + ${recipe.shareRejectedReason}"></small>
+          </div>
         </div>
-      </div>
 
-      <div class="mb-2">
-        <strong>Calories:</strong>
-        <span th:text="${recipe.calories}"></span> calo
-      </div>
+        <div class="mb-2">
+          <strong>Calories:</strong>
+          <span th:text="${recipe.calories}"></span> calo
+        </div>
 
-      <div class="mb-3">
-        <strong>Thời gian:</strong>
-        <span th:text="${recipe.cookingTime}"></span> phút
-      </div>
+        <div class="mb-3">
+          <strong>Thời gian:</strong>
+          <span th:text="${recipe.cookingTime}"></span> phút
+        </div>
 
-      <hr>
+        <hr>
 
-      <h5>Nguyên liệu</h5>
-      <p class="preline"
-         th:if="${recipe.ingredients != null and !#strings.isEmpty(recipe.ingredients)}"
-         th:text="${recipe.ingredients}"></p>
+        <h5>Nguyên liệu</h5>
+        <p class="preline" th:if="${recipe.ingredients != null and !#strings.isEmpty(recipe.ingredients)}"
+          th:text="${recipe.ingredients}"></p>
+        <p class="text-muted" th:if="${recipe.ingredients == null or #strings.isEmpty(recipe.ingredients)}">
+          Chưa có nguyên liệu.
+        </p>
 
-      <p class="text-muted"
-         th:if="${recipe.ingredients == null or #strings.isEmpty(recipe.ingredients)}">
-        Chưa có nguyên liệu.
-      </p>
+        <h5 class="mt-3">Hướng dẫn</h5>
+        <p class="preline" th:if="${recipe.instructions != null and !#strings.isEmpty(recipe.instructions)}"
+          th:text="${recipe.instructions}"></p>
+        <p class="text-muted" th:if="${recipe.instructions == null or #strings.isEmpty(recipe.instructions)}">
+          Chưa có hướng dẫn.
+        </p>
 
-      <h5 class="mt-3">Hướng dẫn</h5>
-      <p class="preline"
-         th:if="${recipe.instructions != null and !#strings.isEmpty(recipe.instructions)}"
-         th:text="${recipe.instructions}"></p>
+        <hr>
 
-      <p class="text-muted"
-         th:if="${recipe.instructions == null or #strings.isEmpty(recipe.instructions)}">
-        Chưa có hướng dẫn.
-      </p>
+        <!-- 🔥 CHỈ CHỦ CÔNG THỨC THẤY NÚT SỬA/XÓA -->
+        <div th:if="${isOwner != null and isOwner}" class="mt-3">
+          <a th:href="@{'/app/recipes/' + ${recipe.id} + '/edit'}" class="btn btn-warning"
+            th:if="${recipe.shareStatus != 'APPROVED'}">
+            ✏ Sửa
+          </a>
 
-      <hr>
-
-      <!-- 🔥 CHỈ CHỦ CÔNG THỨC THẤY NÚT -->
-      <div th:if="${isOwner != null and isOwner}" class="mt-3">
-
-        <a th:href="@{'/app/recipes/' + ${recipe.id} + '/edit'}"
-           class="btn btn-warning"
-           th:if="${recipe.shareStatus != 'APPROVED'}">
-          ✏ Sửa
-        </a>
-
-        <button class="btn btn-secondary"
-                th:if="${recipe.shareStatus == 'APPROVED'}"
-                disabled>
-          ✏ Đã duyệt – Không thể sửa
-        </button>
-
-        <form th:action="@{'/app/recipes/' + ${recipe.id} + '/delete'}"
-              method="post" style="display:inline">
-          <button class="btn btn-danger">🗑 Xóa</button>
-        </form>
-
-        <form th:if="${recipe.shareStatus == null or recipe.shareStatus == 'REJECTED'}"
-              th:action="@{'/app/recipes/' + ${recipe.id} + '/share'}"
-              method="post"
-              style="display:inline">
-          <button class="btn btn-info"
-                  onclick="return confirm('Bạn chắc chắn muốn chia sẻ công thức này chứ?')">
-            🔗 Chia sẻ
+          <button class="btn btn-secondary" th:if="${recipe.shareStatus == 'APPROVED'}" disabled>
+            ✏ Đã duyệt – Không thể sửa
           </button>
-        </form>
 
-        <button th:if="${recipe.shareStatus == 'PENDING'}"
-                class="btn btn-secondary"
-                disabled>
-          ⏳ Chờ duyệt
-        </button>
+          <form th:action="@{'/app/recipes/' + ${recipe.id} + '/delete'}" method="post" style="display:inline">
+            <button class="btn btn-danger">🗑 Xóa</button>
+          </form>
 
-        <button th:if="${recipe.shareStatus == 'APPROVED'}"
-                class="btn btn-success"
-                disabled>
-          ✔ Đã duyệt
-        </button>
+          <form th:if="${recipe.shareStatus == null or recipe.shareStatus == 'REJECTED'}"
+            th:action="@{'/app/recipes/' + ${recipe.id} + '/share'}" method="post" style="display:inline">
+            <button class="btn btn-info" onclick="return confirm('Bạn chắc chắn muốn chia sẻ công thức này chứ?')">
+              🔗 Chia sẻ
+            </button>
+          </form>
+
+          <button th:if="${recipe.shareStatus == 'PENDING'}" class="btn btn-secondary" disabled>
+            ⏳ Chờ duyệt
+          </button>
+          <button th:if="${recipe.shareStatus == 'APPROVED'}" class="btn btn-success" disabled>
+            ✔ Đã duyệt
+          </button>
+        </div>
+
+        <!-- =====================================================
+           ⭐ SECTION ĐÁNH GIÁ & BÌNH LUẬN (chỉ ở Community)
+           ===================================================== -->
+        <div th:if="${isCommunity == true}" class="mt-5">
+          <div class="d-flex align-items-center justify-content-between mb-4">
+            <h4 class="fw-bold mb-0">
+              <i class="fa fa-star text-warning me-2"></i>Đánh Giá &amp; Bình Luận
+            </h4>
+            <!-- 🚩 Báo cáo công thức (không phải chủ) -->
+            <button th:if="${currentUserId != null and currentUserId != recipe.userId}"
+                    class="btn btn-sm btn-outline-danger"
+                    data-bs-toggle="modal"
+                    th:data-target-type="RECIPE"
+                    th:data-target-id="${recipe.id}"
+                    onclick="openReportModal(this)">
+              <i class="fa fa-flag me-1"></i>Báo cáo vi phạm
+            </button>
+          </div>
+
+          <!-- FORM GỬI ĐÁNH GIÁ (ẩn nếu user đã review rồi) -->
+          <div th:if="${userReview == null}" class="card border-0 shadow-sm p-4 mb-4" style="border-radius:14px;">
+            <h6 class="fw-semibold mb-3">Gửi đánh giá của bạn</h6>
+            <form th:action="@{'/app/community/' + ${recipe.id} + '/reviews'}" method="post">
+              <div class="mb-3">
+                <label class="form-label">Số sao <span class="text-danger">*</span></label>
+                <div class="star-rating">
+                  <input type="radio" id="s5" name="rating" value="5" checked>
+                  <label for="s5" title="5 sao"><i class="fa fa-star"></i></label>
+                  <input type="radio" id="s4" name="rating" value="4">
+                  <label for="s4" title="4 sao"><i class="fa fa-star"></i></label>
+                  <input type="radio" id="s3" name="rating" value="3">
+                  <label for="s3" title="3 sao"><i class="fa fa-star"></i></label>
+                  <input type="radio" id="s2" name="rating" value="2">
+                  <label for="s2" title="2 sao"><i class="fa fa-star"></i></label>
+                  <input type="radio" id="s1" name="rating" value="1">
+                  <label for="s1" title="1 sao"><i class="fa fa-star"></i></label>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="comment" class="form-label">Bình luận</label>
+                <textarea id="comment" name="comment" class="form-control" rows="3"
+                  placeholder="Chia sẻ cảm nhận của bạn về công thức này..." maxlength="1000"></textarea>
+              </div>
+              <button type="submit" class="btn btn-success">
+                <i class="fa fa-paper-plane me-1"></i> Gửi đánh giá
+              </button>
+            </form>
+          </div>
+
+          <!-- THÔNG BÁO ĐÃ ĐÁNH GIÁ -->
+          <div th:if="${userReview != null}" class="alert alert-info mb-4 d-flex align-items-center gap-2">
+            <i class="fa fa-info-circle"></i>
+            <span>Bạn đã đánh giá <strong th:text="${userReview.rating} + ' ⭐'"></strong>.
+              Cuộn xuống để xem &amp; chỉnh sửa đánh giá của bạn.</span>
+          </div>
+
+          <!-- DANH SÁCH REVIEWS -->
+          <div th:if="${reviews != null and !reviews.isEmpty()}">
+            <h6 class="fw-semibold mb-3 text-muted">
+              <i class="fa fa-comments me-1"></i>
+              <span th:text="${totalReviews} + ' đánh giá'"></span>
+            </h6>
+
+            <!-- ===== MỖI REVIEW GỐC ===== -->
+            <div th:each="rev : ${reviews}" class="review-card" th:id="'review-' + ${rev.id}">
+              <div class="d-flex align-items-start gap-3">
+                <img th:src="${rev.user != null ? rev.user.avatarUrl : 'https://ui-avatars.com/api/?name=User&background=4caf50&color=fff'}"
+                     class="reviewer-avatar" alt="av">
+
+                <div class="flex-grow-1">
+                  <!-- Tên + badges + sao + thời gian -->
+                  <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <strong th:text="${rev.user != null ? rev.user.fullName : 'Người dùng'}"></strong>
+                    <span th:if="${rev.userId == recipe.userId}" class="badge text-bg-success"
+                          title="Tác giả công thức">✍️ Tác giả</span>
+                    <div class="stars-display" th:if="${rev.rating != null and rev.rating > 0}">
+                      <span th:each="i : ${#numbers.sequence(1,5)}"
+                            th:class="${i <= rev.rating} ? 'star-filled' : 'star-empty'">
+                        <i class="fa fa-star"></i>
+                      </span>
+                    </div>
+                    <small class="text-muted"
+                           th:text="${#temporals.format(rev.createdAt.toLocalDateTime(), 'dd/MM/yyyy HH:mm')}"></small>
+                    <small th:if="${rev.isEdited()}" class="text-muted fst-italic">(đã chỉnh sửa)</small>
+                  </div>
+
+                  <!-- Nội dung -->
+                  <p class="mb-1 mt-1" th:if="${rev.comment != null and !#strings.isEmpty(rev.comment)}"
+                     th:text="${rev.comment}"></p>
+
+                  <!-- INLINE EDIT FORM -->
+                  <div th:if="${rev.userId == currentUserId}"
+                       th:id="'edit-form-' + ${rev.id}"
+                       class="mt-2" style="display:none;">
+                    <form th:action="@{'/app/community/' + ${recipe.id} + '/reviews/' + ${rev.id} + '/edit'}"
+                          method="post">
+                      <div class="mb-2" th:if="${rev.parentId == null}">
+                        <label class="form-label small fw-semibold">Sửa số sao</label>
+                        <div class="star-rating" style="gap:3px;">
+                          <input type="radio" th:id="'e5-'+${rev.id}" name="rating" value="5" th:checked="${rev.rating==5}">
+                          <label th:for="'e5-'+${rev.id}" style="font-size:22px;"><i class="fa fa-star"></i></label>
+                          <input type="radio" th:id="'e4-'+${rev.id}" name="rating" value="4" th:checked="${rev.rating==4}">
+                          <label th:for="'e4-'+${rev.id}" style="font-size:22px;"><i class="fa fa-star"></i></label>
+                          <input type="radio" th:id="'e3-'+${rev.id}" name="rating" value="3" th:checked="${rev.rating==3}">
+                          <label th:for="'e3-'+${rev.id}" style="font-size:22px;"><i class="fa fa-star"></i></label>
+                          <input type="radio" th:id="'e2-'+${rev.id}" name="rating" value="2" th:checked="${rev.rating==2}">
+                          <label th:for="'e2-'+${rev.id}" style="font-size:22px;"><i class="fa fa-star"></i></label>
+                          <input type="radio" th:id="'e1-'+${rev.id}" name="rating" value="1" th:checked="${rev.rating==1}">
+                          <label th:for="'e1-'+${rev.id}" style="font-size:22px;"><i class="fa fa-star"></i></label>
+                        </div>
+                      </div>
+                      <textarea name="comment" class="form-control form-control-sm mb-2" rows="2"
+                                th:text="${rev.comment}" maxlength="1000"></textarea>
+                      <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-sm btn-success"><i class="fa fa-check me-1"></i>Lưu</button>
+                        <button type="button" class="btn btn-sm btn-secondary"
+                                th:onclick="'toggleEdit(' + ${rev.id} + ')'">Hủy</button>
+                      </div>
+                    </form>
+                  </div>
+
+                  <!-- ACTION BAR: Reply + 3-chấm -->
+                  <div class="d-flex align-items-center gap-3 mt-2">
+                    <button class="btn btn-link btn-sm p-0 text-muted text-decoration-none"
+                            th:onclick="'toggleReply(' + ${rev.id} + ')'">
+                      <i class="fa fa-reply me-1"></i>Trả lời
+                      <span th:if="${rev.replies != null and !rev.replies.isEmpty()}"
+                            class="text-success ms-1"
+                            th:text="'(' + ${#lists.size(rev.replies)} + ')'"></span>
+                    </button>
+
+                    <!-- 3-CHẤM -->
+                    <div class="dropdown ms-auto">
+                      <button class="btn btn-link btn-sm p-0 text-muted fw-bold"
+                              data-bs-toggle="dropdown" aria-expanded="false"
+                              style="font-size:20px; line-height:1; letter-spacing:1px;">⋯</button>
+                      <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" style="min-width:160px; border-radius:10px;">
+                        <!-- Chỉnh sửa & Xóa: chỉ chủ comment -->
+                        <li th:if="${rev.userId == currentUserId}">
+                          <button class="dropdown-item rounded-2"
+                                  th:onclick="'toggleEdit(' + ${rev.id} + ')'">
+                            <i class="fa fa-pen me-2 text-warning"></i>Chỉnh sửa
+                          </button>
+                        </li>
+                        <li th:if="${rev.userId == currentUserId}">
+                          <form th:action="@{'/app/community/' + ${recipe.id} + '/reviews/' + ${rev.id} + '/delete'}"
+                                method="post" class="m-0">
+                            <button type="submit" class="dropdown-item rounded-2 text-danger"
+                                    onclick="return confirm('Xóa đánh giá này?')">
+                              <i class="fa fa-trash me-2"></i>Xóa
+                            </button>
+                          </form>
+                        </li>
+                        <li th:if="${rev.userId == currentUserId}"><hr class="dropdown-divider my-1"></li>
+                        <!-- Báo cáo: bất kỳ ai (kể cả chủ, nếu muốn) -->
+                        <li th:if="${currentUserId != null and currentUserId != rev.userId}">
+                          <button class="dropdown-item rounded-2 text-danger"
+                                  th:data-target-type="REVIEW"
+                                  th:data-target-id="${rev.id}"
+                                  onclick="openReportModal(this)">
+                            <i class="fa fa-flag me-2"></i>Báo cáo
+                          </button>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ===== REPLIES ===== -->
+              <div th:id="'replies-container-' + ${rev.id}"
+                   class="ms-5 mt-3"
+                   th:if="${rev.replies != null and !rev.replies.isEmpty()}">
+                <div th:each="reply : ${rev.replies}"
+                     class="reply-card mb-2 p-2 rounded-3 d-flex align-items-start gap-2"
+                     th:id="'review-' + ${reply.id}">
+                  <img th:src="${reply.user != null ? reply.user.avatarUrl : 'https://ui-avatars.com/api/?name=User&background=4caf50&color=fff'}"
+                       style="width:30px;height:30px;border-radius:50%;object-fit:cover;flex-shrink:0;" alt="av">
+                  <div class="flex-grow-1">
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                      <strong class="small" th:text="${reply.user != null ? reply.user.fullName : 'Người dùng'}"></strong>
+                      <span th:if="${reply.userId == recipe.userId}" class="badge text-bg-success"
+                            style="font-size:10px;">Tác giả</span>
+                      <small class="text-muted"
+                             th:text="${#temporals.format(reply.createdAt.toLocalDateTime(), 'dd/MM/yyyy HH:mm')}"></small>
+                      <small th:if="${reply.isEdited()}" class="text-muted fst-italic">(đã sửa)</small>
+                    </div>
+
+                    <!-- @mention hiển thị -->
+                    <p class="mb-1 small">
+                      <span th:if="${reply.mentionUser != null}"
+                            style="color:#2563eb;font-weight:600;">@<span th:text="${reply.mentionUser.fullName}"></span></span>
+                      <span th:text="${reply.comment}"></span>
+                    </p>
+
+                    <!-- Inline edit reply -->
+                    <div th:if="${reply.userId == currentUserId}"
+                         th:id="'edit-form-' + ${reply.id}"
+                         style="display:none;">
+                      <form th:action="@{'/app/community/' + ${recipe.id} + '/reviews/' + ${reply.id} + '/edit'}"
+                            method="post">
+                        <textarea name="comment" class="form-control form-control-sm mb-1" rows="2"
+                                  th:text="${reply.comment}" maxlength="500"></textarea>
+                        <div class="d-flex gap-2">
+                          <button type="submit" class="btn btn-sm btn-success py-0 px-2"><i class="fa fa-check"></i> Lưu</button>
+                          <button type="button" class="btn btn-sm btn-secondary py-0 px-2"
+                                  th:onclick="'toggleEdit(' + ${reply.id} + ')'">Hủy</button>
+                        </div>
+                      </form>
+                    </div>
+
+                    <!-- ACTION BAR: Trả lời + 3-chấm reply -->
+                    <div class="d-flex align-items-center gap-3 mt-1">
+                      <!-- Nút trả lời trên mỗi reply -->
+                      <button class="btn btn-link btn-sm p-0 text-muted text-decoration-none"
+                              style="font-size:12px;"
+                              th:onclick="'toggleReply(' + ${reply.id} + ')'">
+                        <i class="fa fa-reply me-1"></i>Trả lời
+                      </button>
+
+                      <!-- 3-chấm menu cho mọi reply -->
+                      <div class="dropdown ms-auto">
+                        <button class="btn btn-link btn-sm p-0 text-muted fw-bold"
+                                data-bs-toggle="dropdown"
+                                style="font-size:16px; line-height:1; letter-spacing:1px;">⋯</button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" style="min-width:140px; border-radius:10px;">
+                          <!-- Sửa + xóa: chỉ chủ comment -->
+                          <li th:if="${reply.userId == currentUserId}">
+                            <button class="dropdown-item small rounded-2"
+                                    th:onclick="'toggleEdit(' + ${reply.id} + ')'">
+                              <i class="fa fa-pen me-2 text-warning"></i>Chỉnh sửa
+                            </button>
+                          </li>
+                          <li th:if="${reply.userId == currentUserId}">
+                            <form th:action="@{'/app/community/' + ${recipe.id} + '/reviews/' + ${reply.id} + '/delete'}"
+                                  method="post" class="m-0">
+                              <button type="submit" class="dropdown-item small rounded-2 text-danger"
+                                      onclick="return confirm('Xóa phản hồi này?')">
+                                <i class="fa fa-trash me-2"></i>Xóa
+                              </button>
+                            </form>
+                          </li>
+                          <li th:if="${reply.userId == currentUserId and currentUserId != null and currentUserId != reply.userId}"><hr class="dropdown-divider my-1"></li>
+                          <!-- Báo cáo: bất kỳ ai trừ chủ comment -->
+                          <li th:if="${currentUserId != null and currentUserId != reply.userId}">
+                            <button class="dropdown-item small rounded-2 text-danger"
+                                    th:data-target-type="REVIEW"
+                                    th:data-target-id="${reply.id}"
+                                    onclick="openReportModal(this)">
+                              <i class="fa fa-flag me-2"></i>Báo cáo
+                            </button>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    <!-- FORM TRẢ LỜI cho reply cụ thể -->
+                    <div th:id="'reply-form-' + ${reply.id}"
+                         class="mt-2" style="display:none;">
+                      <form th:action="@{'/app/community/' + ${recipe.id} + '/reviews/' + ${reply.id} + '/reply'}"
+                            method="post" class="d-flex gap-2 align-items-end">
+                        <div class="flex-grow-1">
+                          <small class="text-primary fw-semibold"
+                                 th:text="'Trả lời @' + (${reply.user != null ? reply.user.fullName : 'Người dùng'})"></small>
+                          <textarea name="comment" class="form-control form-control-sm mt-1" rows="2"
+                                    placeholder="Viết phản hồi..." maxlength="500" required></textarea>
+                        </div>
+                        <div class="d-flex flex-column gap-1">
+                          <button type="submit" class="btn btn-sm btn-success" title="Gửi">
+                            <i class="fa fa-paper-plane"></i>
+                          </button>
+                          <button type="button" class="btn btn-sm btn-secondary" title="Đóng"
+                                  th:onclick="'toggleReply(' + ${reply.id} + ')'">
+                            <i class="fa fa-times"></i>
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- FORM NHẬP REPLY cho review gốc (ẩn mặc định) -->
+              <div th:id="'reply-form-' + ${rev.id}"
+                   class="ms-5 mt-2" style="display:none;">
+                <form th:action="@{'/app/community/' + ${recipe.id} + '/reviews/' + ${rev.id} + '/reply'}"
+                      method="post" class="d-flex gap-2 align-items-end">
+                  <div class="flex-grow-1">
+                    <small class="text-primary fw-semibold"
+                           th:text="'Trả lời @' + (${rev.user != null ? rev.user.fullName : 'Người dùng'})"></small>
+                    <textarea name="comment" class="form-control form-control-sm mt-1" rows="2"
+                              placeholder="Viết phản hồi..." maxlength="500" required></textarea>
+                  </div>
+                  <div class="d-flex flex-column gap-1">
+                    <button type="submit" class="btn btn-sm btn-success" title="Gửi">
+                      <i class="fa fa-paper-plane"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-secondary" title="Đóng"
+                            th:onclick="'toggleReply(' + ${rev.id} + ')'">
+                      <i class="fa fa-times"></i>
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+            </div><!-- END EACH REVIEW -->
+          </div>
+
+          <!-- Không có review -->
+          <div th:if="${reviews == null or reviews.isEmpty()}" class="text-muted text-center py-4">
+            <i class="fa fa-comment-slash fa-2x mb-2 d-block"></i>
+            Chưa có đánh giá nào. Hãy là người đầu tiên!
+          </div>
+        </div>
+        <!-- END REVIEW SECTION -->
 
       </div>
-
     </div>
   </div>
-</div>
 
+  <!-- =====================================================
+       🚩 MODAL BÁO CÁO VI PHẠM
+       ===================================================== -->
+  <div class="modal fade" id="reportModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 rounded-4 shadow">
+        <div class="modal-header bg-danger text-white rounded-top-4">
+          <h5 class="modal-title"><i class="fa fa-flag me-2"></i>Báo cáo vi phạm</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="reportForm" method="post">
+          <div class="modal-body">
+            <p class="text-muted small mb-3">Chọn lý do báo cáo:</p>
+            <div class="mb-3">
+              <select name="reason" class="form-select" required>
+                <option value="" disabled selected>-- Chọn lý do --</option>
+                <option value="Nội dung không phù hợp">Nội dung không phù hợp</option>
+                <option value="Thông tin sai lệch">Thông tin sai lệch / gây hiểu nhầm</option>
+                <option value="Ngôn từ thô tục">Ngôn từ thô tục, xúc phạm</option>
+                <option value="Spam / quảng cáo">Spam / quảng cáo</option>
+                <option value="Vi phạm bản quyền">Vi phạm bản quyền</option>
+                <option value="Ảnh hưởng sức khỏe">Công thức ảnh hưởng đến sức khỏe</option>
+                <option value="Lý do khác">Lý do khác</option>
+              </select>
+            </div>
+            <div class="mb-2">
+              <textarea name="description" class="form-control" rows="3"
+                        placeholder="Mô tả thêm (tuỳ chọn)..." maxlength="500"></textarea>
+            </div>
+          </div>
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+            <button type="submit" class="btn btn-danger">
+              <i class="fa fa-paper-plane me-1"></i>Gửi báo cáo
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!-- END REPORT MODAL -->
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script th:inline="javascript">
+    const recipeId = /*[[${recipe.id}]]*/ 0;
+
+    function toggleEdit(id) {
+      const form = document.getElementById('edit-form-' + id);
+      if (form) form.style.display = (form.style.display === 'none' ? 'block' : 'none');
+    }
+
+    function toggleReply(id) {
+      const form = document.getElementById('reply-form-' + id);
+      if (form) form.style.display = (form.style.display === 'none' ? 'block' : 'none');
+    }
+
+    /** Mở modal báo cáo, điền endpoint tương ứng theo target-type/target-id */
+    function openReportModal(btn) {
+      const type = btn.getAttribute('data-target-type');
+      const targetId = btn.getAttribute('data-target-id');
+      let action = '';
+      if (type === 'RECIPE') {
+        action = '/app/community/' + recipeId + '/report';
+      } else {
+        action = '/app/community/' + recipeId + '/reviews/' + targetId + '/report';
+      }
+      document.getElementById('reportForm').action = action;
+      const modal = new bootstrap.Modal(document.getElementById('reportModal'));
+      modal.show();
+    }
+  </script>
 </body>
+
 </html>
+

@@ -1,327 +1,131 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title th:text="${mode == 'create' ? 'Thêm người dùng' : 'Chỉnh sửa người dùng'}"></title>
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-          rel="stylesheet">
-
-    <style>
-        body {
-    background: #f3f4f6;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
-
-/* ===================== SIDEBAR ===================== */
-.sidebar {
-    background: linear-gradient(180deg, #111827 0%, #1f2937 100%);
-    min-height: 100vh;
-    color: #fff;
-    padding: 20px 18px;
-    box-shadow: 4px 0 18px rgba(0,0,0,0.45);
-}
-
-.sidebar h4 {
-    font-weight: 700;
-    font-size: 20px;
-    margin-bottom: 18px;
-    padding-left: 2px;
-}
-
-.sidebar .nav-link {
-    border-radius: 12px;
-    padding: 10px 14px;
-    color: #e5e7eb !important;
-    font-size: 15px;
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    transition: .2s;
-}
-
-.sidebar .nav-link:hover:not(.active) {
-    background: rgba(255,255,255,0.12);
-}
-
-.sidebar .nav-link.active {
-    background: #22c55e;
-    color: #0b1120 !important;
-    font-weight: 600;
-}
-
-.sidebar .icon {
-    width: 26px;
-    height: 26px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255,255,255,0.1);
-    border-radius: 8px;
-    font-size: 14px;
-}
-
-/* Logout button */
-.sidebar form {
-    border-top: 1px solid rgba(255,255,255,0.2);
-    padding-top: 20px;
-    margin-top: 30px;
-}
-
-/* ===================== MAIN HEADER ===================== */
-.main-header {
-    border-bottom: 1px solid rgba(0,0,0,0.1);
-    padding-bottom: 14px;
-    margin-bottom: 25px;
-}
-
-/* ===================== DASHBOARD CARDS ===================== */
-.stat-card {
-    border-radius: 16px;
-    border: none;
-    padding: 22px;
-    color: #fff;
-    box-shadow: 0 8px 18px rgba(0,0,0,0.12);
-}
-
-.bg-blue { background: #3b82f6; }
-.bg-green { background: #22c55e; }
-.bg-yellow { background: #eab308; }
-.bg-red { background: #ef4444; }
-
-.stat-value {
-    font-size: 28px;
-    font-weight: 700;
-}
-.stat-label {
-    font-size: 14px;
-    opacity: .9;
-}
-
-/* ===================== TABLES ===================== */
-.table-hover tbody tr:hover {
-    background: #f0f2f5 !important;
-}
-
-.table th {
-    font-weight: 600;
-    color: #374151;
-}
-
-/* ===================== BUTTONS ===================== */
-.btn-success {
-    background: #22c55e !important;
-    border-color: #22c55e !important;
-}
-.btn-success:hover {
-    background: #16a34a !important;
-}
-
-.btn-primary {
-    background: #3b82f6 !important;
-    border-color: #3b82f6 !important;
-}
-.btn-primary:hover {
-    background: #2563eb !important;
-}
-
-.btn-danger {
-    background: #ef4444 !important;
-    border-color: #ef4444 !important;
-}
-.btn-danger:hover {
-    background: #dc2626 !important;
-}
-
-.btn-warning {
-    background: #eab308 !important;
-    border-color: #eab308 !important;
-    color: #000;
-}
-.btn-warning:hover {
-    background: #ca8a04 !important;
-}
-
-/* ===================== FORM PAGES ===================== */
-.form-card {
-    background: #ffffff;
-    border-radius: 16px;
-    padding: 28px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.07);
-}
-
-.form-title {
-    font-size: 22px;
-    font-weight: 700;
-    color: #15803d;
-}
-
-label {
-    font-weight: 600;
-    margin-bottom: 6px;
-}
-
-/* ===================== COMMUNITY APPROVAL BADGES ===================== */
-.badge.bg-warning {
-    background: #facc15 !important;
-    color: #000 !important;
-}
-.badge.bg-success {
-    background: #22c55e !important;
-}
-.badge.bg-danger {
-    background: #ef4444 !important;
-}
-
-/* Clickable table rows if needed */
-.table-row-link {
-    cursor: pointer;
-    transition: .2s;
-}
-.table-row-link:hover {
-    background: #eef2ff !important;
-}
-
-    </style>
+  <meta charset="UTF-8"><title th:text="${mode=='create'?'Thêm người dùng':'Chỉnh sửa người dùng'}">Người dùng</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root{--nav-h:64px;--nav-bg:#0f172a;--ac:#818cf8;--acd:#6366f1;--bg:#f4f5fb;--card:#fff;--bd:#e8eaf2;--sh:0 1px 3px rgba(0,0,0,.05),0 6px 20px rgba(0,0,0,.06);--t1:#0f172a;--t3:#9ca3af;--r:14px;--tr:.2s ease;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t1);font-size:14px;min-height:100vh;}
+    .topnav{position:sticky;top:0;z-index:200;height:var(--nav-h);background:var(--nav-bg);display:flex;align-items:center;padding:0 28px;gap:0;box-shadow:0 4px 20px rgba(0,0,0,.25);}
+    .nav-brand{display:flex;align-items:center;gap:10px;margin-right:36px;text-decoration:none;flex-shrink:0;}
+    .nav-logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--acd),var(--ac));display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;}
+    .nb-text{font-size:15px;font-weight:800;color:#fff;} .nb-sub{font-size:10.5px;color:#64748b;}
+    .nav-links{display:flex;align-items:center;gap:2px;}
+    .nl{display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:9px;color:#94a3b8;font-size:13.5px;font-weight:500;text-decoration:none;transition:var(--tr);position:relative;}
+    .nl:hover{background:rgba(255,255,255,.08);color:#e2e8f0;}
+    .nl.active{background:rgba(129,140,248,.15);color:var(--ac);}
+    .nl.active::after{content:'';position:absolute;bottom:-1px;left:14px;right:14px;height:2px;background:var(--ac);border-radius:2px 2px 0 0;}
+    .nav-right{display:flex;align-items:center;gap:10px;margin-left:auto;}
+    .nav-sep{width:1px;height:20px;background:rgba(255,255,255,.1);}
+    .n-admin{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:20px;background:rgba(255,255,255,.07);}
+    .n-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--acd),var(--ac));display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;}
+    .n-name{font-size:12.5px;font-weight:600;color:#e2e8f0;}
+    .n-logout{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;background:rgba(239,68,68,.1);color:#f87171;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:var(--tr);}
+    .n-logout:hover{background:rgba(239,68,68,.2);}
+    .page-wrap{padding:28px 32px;}
+    .page-head{display:flex;align-items:start;justify-content:space-between;margin-bottom:24px;}
+    .pt{font-size:22px;font-weight:800;letter-spacing:-.4px;} .ps{font-size:13px;color:var(--t3);margin-top:3px;}
+    /* form card */
+    .fc{background:var(--card);border-radius:var(--r);border:1px solid var(--bd);box-shadow:var(--sh);padding:32px;}
+    .fc-title{font-size:15px;font-weight:700;padding-bottom:16px;margin-bottom:20px;border-bottom:1px solid var(--bd);}
+    .fl{font-size:12.5px;font-weight:600;color:#374151;margin-bottom:6px;display:block;}
+    .fh{font-size:11px;color:var(--t3);margin-left:5px;font-weight:400;}
+    .fi{width:100%;border:1.5px solid var(--bd);border-radius:10px;padding:10px 14px;font-size:13.5px;font-family:inherit;color:var(--t1);background:var(--card);transition:var(--tr);outline:none;}
+    .fi:focus{border-color:var(--acd);box-shadow:0 0 0 3px rgba(99,102,241,.12);}
+    .fi::placeholder{color:var(--t3);}
+    /* buttons */
+    .btn-a{display:inline-flex;align-items:center;gap:7px;padding:10px 22px;border-radius:10px;font-size:13.5px;font-weight:700;text-decoration:none;transition:var(--tr);border:none;cursor:pointer;}
+    .bt-indigo{background:linear-gradient(135deg,var(--acd),var(--ac));color:#fff;} .bt-indigo:hover{filter:brightness(1.08);color:#fff;}
+    .bt-ghost{background:#f1f5f9;color:#64748b;border:1px solid var(--bd);} .bt-ghost:hover{background:#e2e8f0;color:var(--t1);}
+    .btn-b{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;background:#f1f5f9;color:#64748b;border:1px solid var(--bd);transition:var(--tr);}
+    .btn-b:hover{background:#e2e8f0;color:var(--t1);}
+  </style>
 </head>
-
 <body>
-
-<div class="container-fluid">
-    <div class="row min-vh-100">
-
-        <!-- SIDEBAR -->
-        <div class="col-md-3 col-lg-2 sidebar">
-
-            <h4 class="mb-3">Admin Panel</h4>
-            <ul class="nav flex-column mb-auto">
-
-                <li class="nav-item mb-1">
-                    <a href="/admin/dashboard"
-                       class="nav-link"
-                       th:classappend="${activePage=='dashboard'} ? ' active'">
-                        <span class="icon">📊</span> Dashboard
-                    </a>
-                </li>
-
-                <li class="nav-item mb-1">
-                    <a href="/admin/users"
-                       class="nav-link"
-                       th:classappend="${activePage=='users'} ? ' active'">
-                        <span class="icon">👥</span> Quản lý người dùng
-                    </a>
-                </li>
-
-                <li class="nav-item mb-1">
-                    <a href="/admin/community"
-                       class="nav-link"
-                       th:classappend="${activePage=='community'} ? ' active'">
-                        <span class="icon">🌎</span> Duyệt công thức
-                    </a>
-                </li>
-
-            </ul>
-
-            <form class="mt-4 pt-3 border-top border-secondary-subtle"
-                  th:action="@{/logout}" method="post">
-                <button class="btn btn-outline-light w-100">Đăng xuất</button>
-            </form>
-
-        </div>
-
-        <!-- MAIN CONTENT -->
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-4 py-4">
-
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="form-title" th:text="${mode == 'create' ? 'Thêm người dùng mới' : 'Chỉnh sửa người dùng'}"></h2>
-
-                <a href="/admin/users" class="btn btn-secondary btn-sm">
-                    ← Quay lại danh sách
-                </a>
-            </div>
-
-            <div class="form-card">
-
-                <form th:action="@{${mode == 'create' ? '/admin/users/create' : '/admin/users/' + user.id + '/edit'}}"
-                      th:object="${user}"
-                      method="post">
-
-                    <!-- FULL NAME -->
-                    <div class="mb-3">
-                        <label>Họ tên</label>
-                        <input type="text" class="form-control"
-                               th:field="*{fullName}" required>
-                    </div>
-
-                    <!-- EMAIL -->
-                    <div class="mb-3">
-                        <label>Email</label>
-                        <input type="email" class="form-control"
-                               th:field="*{email}" required>
-                    </div>
-
-                    <!-- PASSWORD -->
-                    <div class="mb-3">
-                        <label>Mật khẩu</label>
-
-                        <input type="text" class="form-control"
-                               th:placeholder="${mode == 'edit' ? 'Để trống nếu không đổi' : ''}"
-                               th:field="*{password}">
-                    </div>
-
-                    <!-- ROLE -->
-                    <div class="mb-3">
-                        <label>Quyền</label>
-
-                        <select class="form-select" th:field="*{role}">
-                            <option value="USER">USER</option>
-                            <option value="ADMIN">ADMIN</option>
-                        </select>
-                    </div>
-
-                    <!-- AVATAR URL -->
-                    <div class="mb-3">
-                        <label>Avatar URL</label>
-                        <input type="text" class="form-control" th:field="*{avatarUrl}">
-                    </div>
-
-                    <!-- NOTE -->
-                    <div class="mb-3">
-                        <label>Ghi chú</label>
-                        <textarea class="form-control" rows="3" th:field="*{note}"></textarea>
-                    </div>
-
-                    <!-- STATUS -->
-                    <div class="mb-3">
-                        <label>Trạng thái</label>
-
-                        <select class="form-select" th:field="*{status}">
-                            <option value="ACTIVE">ACTIVE</option>
-                            <option value="BLOCKED">BLOCKED</option>
-                        </select>
-                    </div>
-
-                    <!-- BUTTONS -->
-                    <div class="d-flex justify-content-end gap-2 mt-4">
-                        <a href="/admin/users" class="btn btn-grey btn-outline-secondary px-4">
-                            Hủy
-                        </a>
-
-                        <button type="submit" class="btn btn-green px-4">
-                            Lưu lại
-                        </button>
-                    </div>
-
-                </form>
-
-            </div>
-
-        </main>
-
+<nav class="topnav">
+  <a href="/admin/dashboard" class="nav-brand">
+    <div class="nav-logo"><i class="fa-solid fa-bowl-food"></i></div>
+    <div><div class="nb-text">RecipeAdmin</div><div class="nb-sub">Bảng quản trị</div></div>
+  </a>
+  <div class="nav-links">
+    <a href="/admin/dashboard" class="nl"><i class="fa-solid fa-house"></i>Tổng quan</a>
+    <a href="/admin/users" class="nl active"><i class="fa-solid fa-users"></i>Người dùng</a>
+    <a href="/admin/community" class="nl"><i class="fa-solid fa-globe"></i>Duyệt công thức</a>
+    <a href="/admin/reports" class="nl"><i class="fa-solid fa-flag"></i>Báo cáo vi phạm</a>
+  </div>
+  <div class="nav-right">
+    <div class="nav-sep"></div>
+    <div class="n-admin">
+      <div class="n-av"><i class="fa-solid fa-user-tie" style="font-size:11px;"></i></div>
+      <span class="n-name">Quản trị viên</span>
     </div>
+    <form th:action="@{/logout}" method="post">
+      <button type="submit" class="n-logout"><i class="fa-solid fa-arrow-right-from-bracket"></i>Đăng xuất</button>
+    </form>
+  </div>
+</nav>
+
+<div class="page-wrap">
+  <div class="page-head">
+    <div>
+      <div class="pt" th:text="${mode=='create'?'Thêm người dùng mới':'Chỉnh sửa tài khoản'}"></div>
+      <div class="ps">Quản lý thông tin tài khoản người dùng hệ thống</div>
+    </div>
+    <a href="/admin/users" class="btn-b"><i class="fa-solid fa-arrow-left"></i>Quay lại</a>
+  </div>
+
+  <div class="fc">
+    <div class="fc-title" th:text="${mode=='create'?'Thông tin tài khoản mới':'Cập nhật thông tin'}"></div>
+    <form th:action="@{${mode=='create'?'/admin/users/create':'/admin/users/'+user.id+'/edit'}}"
+          th:object="${user}" method="post">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="fl">Họ tên <span style="color:#ef4444;">*</span></label>
+          <input type="text" class="fi" th:field="*{fullName}" placeholder="Nguyễn Văn A" required>
+        </div>
+        <div class="col-md-6">
+          <label class="fl">Email <span style="color:#ef4444;">*</span></label>
+          <input type="email" class="fi" th:field="*{email}" placeholder="example@email.com" required>
+        </div>
+        <div class="col-md-6">
+          <label class="fl">Mật khẩu <span class="fh" th:if="${mode=='edit'}">(để trống để giữ nguyên)</span></label>
+          <input type="text" class="fi" th:field="*{password}" placeholder="Nhập mật khẩu...">
+        </div>
+        <div class="col-md-3">
+          <label class="fl">Vai trò</label>
+          <select class="fi" th:field="*{role}">
+            <option value="USER">Người dùng</option>
+            <option value="ADMIN">Quản trị viên</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="fl">Trạng thái</label>
+          <select class="fi" th:field="*{status}">
+            <option value="ACTIVE">Hoạt động</option>
+            <option value="BLOCKED">Bị khóa</option>
+          </select>
+        </div>
+        <div class="col-12">
+          <label class="fl">Đường dẫn ảnh đại diện</label>
+          <input type="text" class="fi" th:field="*{avatarUrl}" placeholder="https://...">
+        </div>
+        <div class="col-12">
+          <label class="fl">Ghi chú</label>
+          <textarea class="fi" style="resize:vertical;" rows="3" th:field="*{note}" placeholder="Ghi chú tuỳ chọn..."></textarea>
+        </div>
+      </div>
+      <div class="d-flex gap-3 mt-4">
+        <button type="submit" class="btn-a bt-indigo">
+          <i class="fa-solid fa-floppy-disk"></i>Lưu lại
+        </button>
+        <a href="/admin/users" class="btn-a bt-ghost">Hủy</a>
+      </div>
+    </form>
+  </div>
 </div>
-
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+</body></html>
